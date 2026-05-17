@@ -8,7 +8,6 @@ import com.drake.droidblox.logger.Logger
 import com.drake.droidblox.sharedprefs.FastFlagsManager
 import com.drake.droidblox.sharedprefs.SettingsManager
 import com.drake.droidblox.shizuku.ShizukuHelper
-import java.io.File
 
 private const val TAG = "DBLaunchRoblox"
 const val ROBLOX_PACKAGE = "com.roblox.client"
@@ -60,14 +59,11 @@ fun launchRoblox(
                 if (settingsManager.useShizuku && ShizukuHelper.isBound) {
                     val path = "/data/local/tmp/ClientAppSettings.json"
                     logger.d(TAG, "Writing fflags via Shizuku to $path")
-                    if (ShizukuHelper.writeFile(path, currentFFlags)) {
-                        logger.d(TAG, "Shizuku write succeeded")
-                    } else {
-                        logger.e(TAG, "Shizuku write failed, falling back to local")
-                        writeLocalFFlags(context, currentFFlags, logger)
+                    if (!ShizukuHelper.writeFile(path, currentFFlags)) {
+                        logger.e(TAG, "Shizuku write failed")
                     }
                 } else {
-                    writeLocalFFlags(context, currentFFlags, logger)
+                    logger.w(TAG, "Shizuku not available — FFlags require Shizuku + Xposed (LSPosed) to work")
                 }
             }
         }
@@ -81,23 +77,5 @@ fun launchRoblox(
         context.startActivity(intent)
     } catch (e: Exception) {
         logger.e(TAG, "Failed to launch Roblox: ${e.message}")
-    }
-}
-
-private fun writeLocalFFlags(context: Context, fflags: String, logger: Logger) {
-    logger.d(TAG, "Writing fflags to app files dir")
-    val fflagDir = File(context.filesDir, "exe/ClientSettings")
-    val fflagFile = File(fflagDir, "ClientAppSettings.json")
-    if (!fflagDir.exists()) {
-        logger.d(TAG, "Creating ClientSettings directory")
-        if (fflagDir.mkdirs()) {
-            logger.d(TAG, "Successfully created directory, writing fflags")
-            fflagFile.writeText(fflags)
-        } else {
-            logger.e(TAG, "Couldn't create directory")
-        }
-    } else {
-        logger.d(TAG, "Directory exists, writing fflags")
-        fflagFile.writeText(fflags)
     }
 }

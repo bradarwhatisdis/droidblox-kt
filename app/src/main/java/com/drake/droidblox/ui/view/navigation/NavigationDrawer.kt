@@ -71,6 +71,14 @@ fun NavigationDrawer(
                     }
                 )
                 NavigationDrawerItem(
+                    label = { Text("📦  APK Patcher") },
+                    selected = screenName == Routes.PATCHER,
+                    onClick = {
+                        navController?.navigate(Routes.PATCHER)
+                        scope.launch { drawerState.close() }
+                    }
+                )
+                NavigationDrawerItem(
                     label = { Text("📄  About") },
                     selected = screenName == Routes.ABOUT,
                     onClick = {

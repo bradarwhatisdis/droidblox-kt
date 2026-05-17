@@ -87,4 +87,8 @@ object ShizukuHelper {
         }
     }
 
+    fun runCommand(command: String): String {
+        val w = writer ?: throw IllegalStateException("Shizuku not bound")
+        return w.execCommand(command)
+    }
 }

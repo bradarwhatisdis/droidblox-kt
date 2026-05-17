@@ -8,6 +8,7 @@ import com.drake.droidblox.apiservice.httpclient.customHttpClient
 import com.drake.droidblox.logger.AndroidLogger
 import com.drake.droidblox.logger.FileLogger
 import com.drake.droidblox.logger.Logger
+import com.drake.droidblox.patcher.ApkPatcher
 import com.drake.droidblox.sharedprefs.SettingsManager
 import com.drake.droidblox.sharedprefs.FastFlagsManager
 import dagger.Module

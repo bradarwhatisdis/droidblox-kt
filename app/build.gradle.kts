@@ -125,6 +125,9 @@ dependencies {
     // Javax
     implementation(libs.javax)
 
+    // Apksig
+    implementation(libs.apksig.android)
+
     // Desugaring (required by Shizuku v13)
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 

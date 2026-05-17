@@ -14,4 +14,16 @@ class FileWriterService : IFileWriter.Stub() {
             false
         }
     }
+
+    override fun execCommand(command: String): String {
+        return try {
+            val process = Runtime.getRuntime().exec(arrayOf("sh", "-c", command))
+            val stdout = process.inputStream.bufferedReader().readText()
+            val stderr = process.errorStream.bufferedReader().readText()
+            val exitCode = process.waitFor()
+            if (exitCode == 0) stdout.trim() else throw RuntimeException("exit $exitCode: $stderr")
+        } catch (e: Exception) {
+            throw RuntimeException(e.message ?: "exec failed")
+        }
+    }
 }
