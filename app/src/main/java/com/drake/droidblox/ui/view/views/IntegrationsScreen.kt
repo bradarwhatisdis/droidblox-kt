@@ -54,27 +54,25 @@ fun IntegrationsScreen(
         }
         SectionText("System")
         val shizuku = viewModel.shizukuState.value
-        ExtendedSwitch(
-            "Shizuku integration",
-            if (shizuku.available) {
-                if (shizuku.hasPermission) {
-                    if (shizuku.bound) "Connected — writes FFlags to /data/local/tmp/"
-                    else "Permission granted, tap to connect"
-                } else "Grant permission in Shizuku"
-            } else "Shizuku not detected — install Shizuku from GitHub",
-            viewModel.settingsManager.useShizuku,
-            enabled = shizuku.bound
-        ) { enabled ->
-            viewModel.settingsManager.useShizuku = enabled
-        }
-        if (!shizuku.hasPermission && shizuku.available) {
+        if (!shizuku.available) {
+            TitleWithSubtitle("Shizuku", "Not detected — install Shizuku from GitHub")
+        } else if (!shizuku.hasPermission) {
+            TitleWithSubtitle("Shizuku", "Permission not granted")
             ExtendedButton("Grant Shizuku permission", "Required for Shizuku integration") {
                 viewModel.requestShizukuPermission()
             }
-        }
-        if (shizuku.hasPermission && !shizuku.bound && shizuku.available) {
+        } else if (!shizuku.bound) {
+            TitleWithSubtitle("Shizuku", "Permission granted, tap to connect")
             ExtendedButton("Connect Shizuku service", "Bind to the remote file writer") {
                 viewModel.bindShizuku()
+            }
+        } else {
+            ExtendedSwitch(
+                "Shizuku integration",
+                "Writes FFlags to /data/local/tmp/",
+                viewModel.settingsManager.useShizuku
+            ) { enabled ->
+                viewModel.settingsManager.useShizuku = enabled
             }
         }
         SectionText("Activity tracking")

@@ -5,12 +5,12 @@ import android.content.Context
 import android.content.ServiceConnection
 import android.os.IBinder
 import rikka.shizuku.Shizuku
-import rikka.shizuku.ShizukuProvider
 
 object ShizukuHelper {
 
     private var writer: IFileWriter? = null
     private var connection: ServiceConnection? = null
+    private var args: Shizuku.UserServiceArgs? = null
     private var _bound = false
 
     val isBound: Boolean get() = _bound && writer != null
@@ -39,9 +39,10 @@ object ShizukuHelper {
 
     fun bind(context: Context) {
         if (_bound || !isAvailable() || !hasPermission()) return
-        val args = Shizuku.UserServiceArgs(
+        val a = Shizuku.UserServiceArgs(
             ComponentName(context, FileWriterService::class.java)
         ).processNameSuffix("filewriter").daemon(false).version(1)
+        args = a
         connection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 writer = IFileWriter.Stub.asInterface(service)
@@ -54,7 +55,7 @@ object ShizukuHelper {
             }
         }
         try {
-            Shizuku.bindUserService(args, connection!!)
+            Shizuku.bindUserService(a, connection!!)
         } catch (_: Exception) { }
     }
 
@@ -62,15 +63,12 @@ object ShizukuHelper {
         writer = null
         _bound = false
         val conn = connection ?: return
+        val a = args ?: return
         try {
-            Shizuku.unbindUserService(
-                Shizuku.UserServiceArgs(
-                    ComponentName("com.drake.droidblox", FileWriterService::class.java.name)
-                ),
-                conn
-            )
+            Shizuku.unbindUserService(a, conn, false)
         } catch (_: Exception) { }
         connection = null
+        args = null
     }
 
     fun writeFile(path: String, content: String): Boolean {
@@ -82,9 +80,4 @@ object ShizukuHelper {
         }
     }
 
-    class ShizukuReceiver : ShizukuProvider() {
-        override fun onPermissionResult(code: Int, grantResult: Int) {
-            super.onPermissionResult(code, grantResult)
-        }
-    }
 }
