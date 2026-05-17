@@ -32,7 +32,7 @@ class ApkPatcher @Inject constructor(
 
     private val workDir: File get() = File(context.filesDir, "patcher").also { it.mkdirs() }
 
-    suspend fun run(allFlagsJson: String, onState: (PatcherState) -> Unit) {
+    suspend fun run(allFlagsJson: String, execCommand: suspend (String) -> String, onState: (PatcherState) -> Unit) {
         try {
             onState(PatcherState(PatchStep.DUMPING_APK, 0f, "Getting Roblox APK..."))
 
@@ -65,7 +65,7 @@ class ApkPatcher @Inject constructor(
 
             onState(PatcherState(PatchStep.INSTALLING, 0.8f, "Installing patched APK..."))
 
-            val installResult = com.drake.droidblox.shizuku.ShizukuHelper.runCommand("pm install -r -t -d \"${signed.absolutePath}\" 2>&1")
+            val installResult = execCommand("pm install -r -t -d \"${signed.absolutePath}\" 2>&1")
             logger.d(TAG, "Install result: $installResult")
 
             onState(PatcherState(
