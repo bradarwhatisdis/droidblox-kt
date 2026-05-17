@@ -1,10 +1,14 @@
 package com.drake.droidblox.ui.view.views
 
+import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -16,12 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.drake.droidblox.patcher.PatchStep
 import com.drake.droidblox.ui.components.BasicScreen
-import com.drake.droidblox.ui.view.navigation.Routes
 import com.drake.droidblox.ui.view.viewmodels.PatcherViewModel
 
 @Composable
@@ -30,6 +34,7 @@ fun PatcherScreen(
     viewModel: PatcherViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
 
     BasicScreen(
         name = "APK Patcher",
@@ -107,6 +112,40 @@ fun PatcherScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("🚀  Patch & Install")
+            }
+        }
+
+        if (state.log.isNotBlank()) {
+            Spacer(Modifier.height(16.dp))
+            Text("Patch Log", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    state.log,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(12.dp)
+                        .verticalScroll(rememberScrollState()),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = {
+                val share = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, state.log)
+                }
+                context.startActivity(Intent.createChooser(share, "Export Patch Log"))
+            }) {
+                Text("📤  Export Log")
             }
         }
     }

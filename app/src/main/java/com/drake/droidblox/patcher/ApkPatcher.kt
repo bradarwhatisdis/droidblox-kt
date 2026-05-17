@@ -33,49 +33,65 @@ class ApkPatcher @Inject constructor(
     private val workDir: File get() = File(context.filesDir, "patcher").also { it.mkdirs() }
 
     suspend fun run(allFlagsJson: String, execCommand: suspend (String) -> String, onState: (PatcherState) -> Unit) {
+        val log = StringBuilder()
+        fun append(msg: String) { log.appendLine(msg); logger.d(TAG, msg) }
+        fun state(step: PatchStep, progress: Float, message: String) = onState(PatcherState(step, progress, message, log = log.toString()))
+        fun error(msg: String) = onState(PatcherState(error = msg, log = log.toString()))
+
         try {
-            onState(PatcherState(PatchStep.DUMPING_APK, 0f, "Getting Roblox APK..."))
+            append("Getting Roblox APK...")
+            state(PatchStep.DUMPING_APK, 0f, "Getting Roblox APK...")
 
             val installedApk = getRobloxApkPath()
             if (installedApk == null) {
-                onState(PatcherState(error = "Roblox is not installed"))
+                error("Roblox is not installed")
                 return
             }
-            logger.d(TAG, "Roblox APK at: $installedApk")
+            append("Roblox APK at: $installedApk")
 
             val rawApk = File(workDir, "original.apk")
-            onState(PatcherState(PatchStep.DUMPING_APK, 0.2f, "Copying Roblox APK..."))
+            append("Copying APK...")
+            state(PatchStep.DUMPING_APK, 0.2f, "Copying Roblox APK...")
 
             File(installedApk).copyTo(rawApk, overwrite = true)
+            append("APK copied (${rawApk.length()} bytes)")
 
             if (!rawApk.exists() || rawApk.length() == 0L) {
-                onState(PatcherState(error = "Failed to copy APK"))
+                error("Failed to copy APK")
                 return
             }
 
             val patched = File(workDir, "patched.apk")
-            onState(PatcherState(PatchStep.PATCHING, 0.4f, "Injecting FFlags into APK..."))
+            append("Injecting FFlags into APK...")
+            state(PatchStep.PATCHING, 0.4f, "Injecting FFlags into APK...")
 
             injectFFlags(rawApk, patched, allFlagsJson)
+            append("FFlags injected")
 
             val signed = File(workDir, "signed.apk")
-            onState(PatcherState(PatchStep.SIGNING, 0.6f, "Signing patched APK..."))
+            append("Signing patched APK...")
+            state(PatchStep.SIGNING, 0.6f, "Signing patched APK...")
 
             signApk(patched, signed)
+            append("APK signed")
 
-            onState(PatcherState(PatchStep.INSTALLING, 0.8f, "Installing patched APK..."))
+            append("Installing via pm install...")
+            state(PatchStep.INSTALLING, 0.8f, "Installing patched APK...")
 
             val installResult = execCommand("pm install -r -t -d \"${signed.absolutePath}\" 2>&1")
-            logger.d(TAG, "Install result: $installResult")
+            append("Install result: $installResult")
 
             onState(PatcherState(
                 PatchStep.DONE, 1f,
                 "Patched APK installed!\nNote: Roblox now has a different signature. Updates must be done through DroidBlox.",
-                patchedApk = signed
+                patchedApk = signed,
+                log = log.toString()
             ))
         } catch (e: Exception) {
-            logger.e(TAG, "Patch failed: ${e.message}")
-            onState(PatcherState(error = e.message ?: "Unknown error"))
+            val msg = "Patch failed: ${e.message}"
+            logger.e(TAG, msg)
+            append(msg)
+            onState(PatcherState(error = e.message ?: "Unknown error", log = log.toString()))
         }
     }
 

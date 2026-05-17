@@ -17,5 +17,6 @@ data class PatcherState(
     val progress: Float = 0f,
     val message: String = "",
     val error: String? = null,
-    val patchedApk: File? = null
+    val patchedApk: File? = null,
+    val log: String = ""
 )
