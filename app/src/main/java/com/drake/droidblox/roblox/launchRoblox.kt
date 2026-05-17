@@ -57,7 +57,7 @@ fun launchRoblox(
             logger.d(TAG, "Applying fast flags")
             val currentFFlags = fflagsManager.rawFFlags
             if (currentFFlags != null) {
-                if (settingsManager.useShizuku && ShizukuHelper.isAvailable() && ShizukuHelper.hasPermission()) {
+                if (settingsManager.useShizuku && ShizukuHelper.isAvailable()) {
                     logger.d(TAG, "Writing via Shizuku to /data/local/tmp/")
                     val ok = ShizukuHelper.writeFile(
                         "/data/local/tmp/ClientAppSettings.json",
