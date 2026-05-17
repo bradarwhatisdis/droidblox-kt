@@ -18,7 +18,12 @@ import com.drake.droidblox.ui.components.ExtendedButton
 import com.drake.droidblox.ui.components.ExtendedSwitch
 import com.drake.droidblox.ui.components.SectionText
 import com.drake.droidblox.ui.components.TitleWithSubtitle
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import com.drake.droidblox.ui.view.viewmodels.IntegrationsScreenVM
+import com.drake.droidblox.ui.view.viewmodels.ShizukuConnectionState
 
 @Composable
 fun IntegrationsScreen(
@@ -55,17 +60,30 @@ fun IntegrationsScreen(
         }
         SectionText("System")
         val shizuku = viewModel.shizukuState.value
+        val connState = viewModel.shizukuConnectionState.value
         if (!shizuku.available) {
             TitleWithSubtitle("Shizuku", "Not detected — install Shizuku from GitHub")
+        } else if (connState == ShizukuConnectionState.Requesting || connState == ShizukuConnectionState.Connecting) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                TitleWithSubtitle("Shizuku", "Connecting\u2026")
+            }
+        } else if (connState == ShizukuConnectionState.Failed) {
+            TitleWithSubtitle("Shizuku", "Connection failed — tap to retry")
+            ExtendedButton("Retry Shizuku", "Try connecting again") {
+                viewModel.requestAndConnectShizuku()
+            }
         } else if (!shizuku.hasPermission) {
             TitleWithSubtitle("Shizuku", "Permission not granted")
             ExtendedButton("Grant Shizuku permission", "Required for Shizuku integration") {
-                viewModel.requestShizukuPermission()
+                viewModel.requestAndConnectShizuku()
             }
         } else if (!shizuku.bound) {
             TitleWithSubtitle("Shizuku", "Permission granted, tap to connect")
             ExtendedButton("Connect Shizuku service", "Bind to the remote file writer") {
-                viewModel.bindShizuku()
+                viewModel.connectShizuku()
             }
         } else {
             ExtendedSwitch(
