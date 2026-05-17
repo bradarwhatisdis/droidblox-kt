@@ -1,10 +1,10 @@
 package com.drake.droidblox.ui.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.sp
 
 @Composable
 fun TitleWithSubtitle(
@@ -15,7 +15,11 @@ fun TitleWithSubtitle(
     Column(
         modifier = modifier
     ) {
-        Text(title, fontSize = 19.sp)
-        Text(subtitle, fontSize = 13.sp)
+        Text(title, style = MaterialTheme.typography.bodyLarge)
+        Text(
+            subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

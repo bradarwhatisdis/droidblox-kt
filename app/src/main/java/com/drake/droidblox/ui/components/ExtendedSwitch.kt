@@ -1,9 +1,11 @@
 package com.drake.droidblox.ui.components
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -19,24 +21,30 @@ fun ExtendedSwitch(
     title: String,
     subtitle: String,
     enabled: Boolean = false,
+    interactive: Boolean = true,
     onClick: ((value: Boolean) -> Unit) = {}
 ) {
     var toggled by remember { mutableStateOf(enabled) }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(5.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp, pressedElevation = 6.dp)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            TitleWithSubtitle(title, subtitle)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TitleWithSubtitle(title, subtitle, modifier = Modifier.weight(1f))
+            Switch(
+                checked = toggled,
+                onCheckedChange = {
+                    toggled = it
+                    onClick(it)
+                },
+                enabled = interactive
+            )
         }
-        Switch(
-            checked = toggled,
-            onCheckedChange = {
-                toggled = it
-                onClick(it)
-            }
-        )
     }
 }
