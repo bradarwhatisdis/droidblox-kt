@@ -8,7 +8,6 @@ enum class PatchStep {
     DOWNLOADING,
     PATCHING,
     SIGNING,
-    INSTALLING,
     DONE
 }
 

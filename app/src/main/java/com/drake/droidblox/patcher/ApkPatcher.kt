@@ -32,66 +32,53 @@ class ApkPatcher @Inject constructor(
 
     private val workDir: File get() = File(context.filesDir, "patcher").also { it.mkdirs() }
 
-    suspend fun run(allFlagsJson: String, execCommand: suspend (String) -> String, onState: (PatcherState) -> Unit) {
+    suspend fun run(allFlagsJson: String, onState: (PatcherState) -> Unit) {
         val log = StringBuilder()
-        fun append(msg: String) { log.appendLine(msg); logger.d(TAG, msg) }
-        fun state(step: PatchStep, progress: Float, message: String) = onState(PatcherState(step, progress, message, log = log.toString()))
-        fun error(msg: String) = onState(PatcherState(error = msg, log = log.toString()))
+        fun emit(step: PatchStep, progress: Float, msg: String) {
+            log.appendLine(msg)
+            logger.d(TAG, msg)
+            onState(PatcherState(step, progress, msg, log = log.toString()))
+        }
+        fun err(msg: String) {
+            log.appendLine(msg)
+            logger.e(TAG, msg)
+            onState(PatcherState(error = msg, log = log.toString()))
+        }
 
         try {
-            append("Getting Roblox APK...")
-            state(PatchStep.DUMPING_APK, 0f, "Getting Roblox APK...")
+            emit(PatchStep.DUMPING_APK, 0f, "Getting Roblox APK...")
 
             val installedApk = getRobloxApkPath()
             if (installedApk == null) {
-                error("Roblox is not installed")
+                err("Roblox is not installed")
                 return
             }
-            append("Roblox APK at: $installedApk")
+            emit(PatchStep.DUMPING_APK, 0.1f, "Roblox APK at: $installedApk")
 
             val rawApk = File(workDir, "original.apk")
-            append("Copying APK...")
-            state(PatchStep.DUMPING_APK, 0.2f, "Copying Roblox APK...")
-
+            emit(PatchStep.DUMPING_APK, 0.15f, "Copying APK...")
             File(installedApk).copyTo(rawApk, overwrite = true)
-            append("APK copied (${rawApk.length()} bytes)")
+            emit(PatchStep.DUMPING_APK, 0.2f, "APK copied (${rawApk.length()} bytes)")
 
             if (!rawApk.exists() || rawApk.length() == 0L) {
-                error("Failed to copy APK")
+                err("Failed to copy APK")
                 return
             }
 
             val patched = File(workDir, "patched.apk")
-            append("Injecting FFlags into APK...")
-            state(PatchStep.PATCHING, 0.4f, "Injecting FFlags into APK...")
-
-            injectFFlags(rawApk, patched, allFlagsJson)
-            append("FFlags injected")
+            emit(PatchStep.PATCHING, 0.25f, "Injecting FFlags into APK...")
+            injectFFlags(rawApk, patched, allFlagsJson, onState, log)
 
             val signed = File(workDir, "signed.apk")
-            append("Signing patched APK...")
-            state(PatchStep.SIGNING, 0.6f, "Signing patched APK...")
-
+            emit(PatchStep.SIGNING, 0.6f, "Signing patched APK...")
             signApk(patched, signed)
-            append("APK signed")
+            emit(PatchStep.SIGNING, 0.7f, "APK signed (${signed.length()} bytes)")
 
-            append("Installing via pm install...")
-            state(PatchStep.INSTALLING, 0.8f, "Installing patched APK...")
-
-            val installResult = execCommand("pm install -r -t -d \"${signed.absolutePath}\" 2>&1")
-            append("Install result: $installResult")
-
-            onState(PatcherState(
-                PatchStep.DONE, 1f,
-                "Patched APK installed!\nNote: Roblox now has a different signature. Updates must be done through DroidBlox.",
-                patchedApk = signed,
-                log = log.toString()
-            ))
+            log.appendLine("Patch complete! APK saved at: ${signed.absolutePath}")
+            logger.d(TAG, "Patch complete! APK saved at: ${signed.absolutePath}")
+            onState(PatcherState(PatchStep.DONE, 1f, "APK ready for install at: ${signed.absolutePath}", patchedApk = signed, log = log.toString()))
         } catch (e: Exception) {
-            val msg = "Patch failed: ${e.message}"
-            logger.e(TAG, msg)
-            append(msg)
-            onState(PatcherState(error = e.message ?: "Unknown error", log = log.toString()))
+            err("Patch failed: ${e.message}")
         }
     }
 
@@ -104,34 +91,52 @@ class ApkPatcher @Inject constructor(
         }
     }
 
-    private fun injectFFlags(input: File, output: File, fflags: String) {
+    private fun injectFFlags(input: File, output: File, fflags: String, onState: (PatcherState) -> Unit, log: StringBuilder) {
         val zipFile = ZipFile(input)
+        val total = zipFile.size()
+        var processed = 0
         ZipOutputStream(FileOutputStream(output)).use { zos ->
             val entries = zipFile.entries()
             var obbFound = false
 
             while (entries.hasMoreElements()) {
                 val entry = entries.nextElement()
+                processed++
+                val entryName = entry.name
 
-                if (entry.name.startsWith(OBB_PREFIX) && entry.name.endsWith(OBB_SUFFIX)) {
-                    logger.d(TAG, "Patching OBB: ${entry.name}")
+                if (entryName.startsWith(OBB_PREFIX) && entryName.endsWith(OBB_SUFFIX)) {
+                    log.appendLine("Patching OBB: $entryName")
+                    logger.d(TAG, "Patching OBB: $entryName")
                     val obbBytes = zipFile.getInputStream(entry).readBytes()
                     val modObb = addFFlagsToObb(obbBytes, fflags)
-                    val newEntry = ZipEntry(entry.name)
+                    val newEntry = ZipEntry(entryName)
                     zos.putNextEntry(newEntry)
                     zos.write(modObb)
                     zos.closeEntry()
                     obbFound = true
+                    log.appendLine("FFlags injected into OBB")
+                    logger.d(TAG, "FFlags injected into OBB")
                 } else {
-                    zos.putNextEntry(ZipEntry(entry.name))
+                    zos.putNextEntry(ZipEntry(entryName))
                     if (!entry.isDirectory) {
                         zipFile.getInputStream(entry).use { it.copyTo(zos) }
                     }
                     zos.closeEntry()
                 }
+
+                if (processed % 100 == 0 || processed == total) {
+                    val p = 0.25f + (processed.toFloat() / total) * 0.35f
+                    val msg = "Processing APK entries: $processed / $total"
+                    log.appendLine(msg)
+                    onState(PatcherState(PatchStep.PATCHING, p, msg, log = log.toString()))
+                }
             }
 
-            if (!obbFound) logger.w(TAG, "OBB entry not found in APK")
+            if (!obbFound) {
+                val w = "OBB entry not found in APK — FFlags will not be embedded!"
+                log.appendLine(w)
+                logger.w(TAG, w)
+            }
         }
         zipFile.close()
     }

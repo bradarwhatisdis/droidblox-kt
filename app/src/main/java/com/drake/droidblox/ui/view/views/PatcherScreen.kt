@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.drake.droidblox.patcher.PatchStep
@@ -42,10 +43,11 @@ fun PatcherScreen(
     ) { _ ->
         Text(
             "Patch the official Roblox APK with your Fast Flags. " +
-                    "This embeds FFlags into the APK, signs it, and installs it.\n\n" +
-                    "⚠️  Requires Shizuku.\n" +
+                    "This embeds FFlags into the APK, signs it, and saves it.\n\n" +
+                    "⚠️  No root / Shizuku needed.\n" +
                     "⚠️  The patched APK has a different signature — " +
-                    "official Roblox will be replaced. Updates must be done through DroidBlox.",
+                    "you must uninstall official Roblox first.\n" +
+                    "⚠️  Updates must be done through DroidBlox.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -91,7 +93,7 @@ fun PatcherScreen(
                 )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("✅  Patched & Installed!", style = MaterialTheme.typography.titleMedium)
+                    Text("✅  Patch Complete!", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(4.dp))
                     Text(
                         state.message,
@@ -101,6 +103,22 @@ fun PatcherScreen(
                 }
             }
             Spacer(Modifier.height(12.dp))
+            state.patchedApk?.let { apk ->
+                Button(
+                    onClick = {
+                        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", apk)
+                        val intent = Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
+                            data = uri
+                            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        }
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("📲  Install APK")
+                }
+                Spacer(Modifier.height(8.dp))
+            }
             OutlinedButton(onClick = { viewModel.reset() }) {
                 Text("Done")
             }
@@ -111,7 +129,7 @@ fun PatcherScreen(
                 onClick = { viewModel.startPatching() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("🚀  Patch & Install")
+                Text("🚀  Start Patching")
             }
         }
 
