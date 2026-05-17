@@ -12,6 +12,7 @@ import androidx.navigation.NavController
 import com.drake.droidblox.logger.TestLogger
 import com.drake.droidblox.sharedprefs.FastFlagsManager
 import com.drake.droidblox.sharedprefs.SettingsManager
+import androidx.compose.runtime.LaunchedEffect
 import com.drake.droidblox.ui.components.BasicScreen
 import com.drake.droidblox.ui.components.ExtendedButton
 import com.drake.droidblox.ui.components.ExtendedSwitch
@@ -27,6 +28,11 @@ fun IntegrationsScreen(
 
     BasicScreen("Integrations", navController) {
         val status = viewModel.robloxStatus.value
+
+        LaunchedEffect(Unit) {
+            viewModel.refreshShizukuState()
+        }
+
         if (status != null) {
             if (status.installed) {
                 TitleWithSubtitle(
@@ -45,6 +51,31 @@ fun IntegrationsScreen(
             "Start playing Roblox"
         ) {
             if (status?.installed == true) viewModel.launchRoblox()
+        }
+        SectionText("System")
+        val shizuku = viewModel.shizukuState.value
+        ExtendedSwitch(
+            "Shizuku integration",
+            if (shizuku.available) {
+                if (shizuku.hasPermission) {
+                    if (shizuku.bound) "Connected — writes FFlags to /data/local/tmp/"
+                    else "Permission granted, tap to connect"
+                } else "Grant permission in Shizuku"
+            } else "Shizuku not detected — install Shizuku from GitHub",
+            viewModel.settingsManager.useShizuku,
+            enabled = shizuku.bound
+        ) { enabled ->
+            viewModel.settingsManager.useShizuku = enabled
+        }
+        if (!shizuku.hasPermission && shizuku.available) {
+            ExtendedButton("Grant Shizuku permission", "Required for Shizuku integration") {
+                viewModel.requestShizukuPermission()
+            }
+        }
+        if (shizuku.hasPermission && !shizuku.bound && shizuku.available) {
+            ExtendedButton("Connect Shizuku service", "Bind to the remote file writer") {
+                viewModel.bindShizuku()
+            }
         }
         SectionText("Activity tracking")
         ExtendedSwitch(

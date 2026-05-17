@@ -42,6 +42,7 @@ android {
         }
     }
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -117,8 +118,15 @@ dependencies {
     implementation(libs.ktor3.serialization.kotlinx.json)
     implementation(libs.org.jetbrains.kotlin.plugin.serialization.gradle.plugin)
 
+    // Shizuku
+    implementation(libs.shizuku.api)
+    implementation(libs.shizuku.provider)
+
     // Javax
     implementation(libs.javax)
+
+    // Desugaring (required by Shizuku v13)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 
     // Junit
     testImplementation(libs.junit)

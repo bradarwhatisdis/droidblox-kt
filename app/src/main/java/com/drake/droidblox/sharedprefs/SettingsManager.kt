@@ -57,4 +57,5 @@ class SettingsManager @Inject constructor(
     var allowActivityJoining by BooleanBased("allowActivityJoining", false)
     var showRobloxUser by BooleanBased("showRobloxUser", false)
     var applyFFlags by BooleanBased("applyFFlags", true)
+    var useShizuku by BooleanBased("useShizuku", false)
 }

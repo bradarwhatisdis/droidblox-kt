@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import com.drake.droidblox.logger.Logger
 import com.drake.droidblox.sharedprefs.FastFlagsManager
 import com.drake.droidblox.sharedprefs.SettingsManager
+import com.drake.droidblox.shizuku.ShizukuHelper
 import java.io.File
 
 private const val TAG = "DBLaunchRoblox"
@@ -56,7 +57,18 @@ fun launchRoblox(
             logger.d(TAG, "Applying fast flags")
             val currentFFlags = fflagsManager.rawFFlags
             if (currentFFlags != null) {
-                writeLocalFFlags(context, currentFFlags, logger)
+                if (settingsManager.useShizuku && ShizukuHelper.isBound) {
+                    val path = "/data/local/tmp/ClientAppSettings.json"
+                    logger.d(TAG, "Writing fflags via Shizuku to $path")
+                    if (ShizukuHelper.writeFile(path, currentFFlags)) {
+                        logger.d(TAG, "Shizuku write succeeded")
+                    } else {
+                        logger.e(TAG, "Shizuku write failed, falling back to local")
+                        writeLocalFFlags(context, currentFFlags, logger)
+                    }
+                } else {
+                    writeLocalFFlags(context, currentFFlags, logger)
+                }
             }
         }
 
