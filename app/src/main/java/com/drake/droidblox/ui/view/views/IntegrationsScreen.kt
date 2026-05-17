@@ -9,14 +9,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.drake.droidblox.DBApplication
 import com.drake.droidblox.logger.TestLogger
+import com.drake.droidblox.sharedprefs.FastFlagsManager
+import com.drake.droidblox.sharedprefs.SettingsManager
 import com.drake.droidblox.ui.components.BasicScreen
 import com.drake.droidblox.ui.components.ExtendedButton
 import com.drake.droidblox.ui.components.ExtendedSwitch
 import com.drake.droidblox.ui.components.SectionText
-import com.drake.droidblox.roblox.launchRoblox
-import com.drake.droidblox.sharedprefs.SettingsManager
+import com.drake.droidblox.ui.components.TitleWithSubtitle
 import com.drake.droidblox.ui.view.viewmodels.IntegrationsScreenVM
 
 @Composable
@@ -26,10 +26,26 @@ fun IntegrationsScreen(
 ) {
 
     BasicScreen("Integrations", navController) {
+        val status = viewModel.robloxStatus.value
+        if (status != null) {
+            if (status.installed) {
+                TitleWithSubtitle(
+                    "Roblox (v${status.version ?: "?"})",
+                    "Installed"
+                )
+            } else {
+                TitleWithSubtitle(
+                    "Roblox",
+                    "Not installed — install Roblox from the Play Store first"
+                )
+            }
+        }
         ExtendedButton(
-            "Launch Roblox",
+            if (status?.installed == true) "Launch Roblox" else "Roblox not installed",
             "Start playing Roblox"
-        ) { viewModel.launchRoblox() }
+        ) {
+            if (status?.installed == true) viewModel.launchRoblox()
+        }
         SectionText("Activity tracking")
         ExtendedSwitch(
             "Enable activity tracking",
@@ -72,6 +88,10 @@ internal fun PreviewIntegrationsScreen() {
         IntegrationsScreen(IntegrationsScreenVM(
             context = null,
             settingsManager = SettingsManager(
+                logger = logger,
+                context = LocalContext.current
+            ),
+            fflagsManager = FastFlagsManager(
                 logger = logger,
                 context = LocalContext.current
             )
