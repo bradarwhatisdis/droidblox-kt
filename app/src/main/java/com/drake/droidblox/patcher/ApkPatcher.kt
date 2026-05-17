@@ -52,17 +52,6 @@ class ApkPatcher @Inject constructor(
                 onState(PatcherState(error = "Failed to copy APK"))
                 return
             }
-            logger.d(TAG, "Roblox APK at: $installedApk")
-
-            val rawApk = File(workDir, "original.apk")
-            onState(PatcherState(PatchStep.DUMPING_APK, 0.2f, "Copying APK via Shizuku..."))
-
-            com.drake.droidblox.shizuku.ShizukuHelper.runCommand("cp \"$installedApk\" \"${rawApk.absolutePath}\"")
-
-            if (!rawApk.exists() || rawApk.length() == 0L) {
-                onState(PatcherState(error = "Failed to copy APK. Ensure Shizuku is connected."))
-                return
-            }
 
             val patched = File(workDir, "patched.apk")
             onState(PatcherState(PatchStep.PATCHING, 0.4f, "Injecting FFlags into APK..."))
