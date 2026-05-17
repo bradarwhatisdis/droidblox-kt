@@ -59,8 +59,18 @@ fun launchRoblox(
             }
         }
     }
-    val intent = Intent(context, Class.forName("$ROBLOX_PACKAGE.ActivityProtocolLaunch"))
-    intent.setData(deeplink.toUri())
-    logger.d(TAG, "Starting activity")
-    context.startActivity(intent)
+    try {
+        val intent = if (deeplink.isNotBlank()) {
+            Intent(Intent.ACTION_VIEW, deeplink.toUri()).apply {
+                `package` = ROBLOX_PACKAGE
+            }
+        } else {
+            context.packageManager.getLaunchIntentForPackage(ROBLOX_PACKAGE)
+                ?: throw PackageManager.NameNotFoundException(ROBLOX_PACKAGE)
+        }
+        logger.d(TAG, "Starting activity: ${intent.action} ${intent.data}")
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        logger.e(TAG, "Failed to launch Roblox: ${e.message}")
+    }
 }
