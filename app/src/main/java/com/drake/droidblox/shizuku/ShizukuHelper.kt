@@ -37,8 +37,11 @@ object ShizukuHelper {
         } catch (_: Exception) { }
     }
 
-    fun bind(context: Context) {
-        if (_bound || !isAvailable() || !hasPermission()) return
+    fun bind(context: Context, onResult: ((Boolean) -> Unit)? = null) {
+        if (_bound || !isAvailable() || !hasPermission()) {
+            onResult?.invoke(_bound)
+            return
+        }
         val a = Shizuku.UserServiceArgs(
             ComponentName(context, FileWriterService::class.java)
         ).processNameSuffix("filewriter").daemon(false).version(1)
@@ -47,16 +50,20 @@ object ShizukuHelper {
             override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
                 writer = IFileWriter.Stub.asInterface(service)
                 _bound = true
+                onResult?.invoke(true)
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
                 writer = null
                 _bound = false
+                onResult?.invoke(false)
             }
         }
         try {
             Shizuku.bindUserService(a, connection!!)
-        } catch (_: Exception) { }
+        } catch (_: Exception) {
+            onResult?.invoke(false)
+        }
     }
 
     fun unbind() {
