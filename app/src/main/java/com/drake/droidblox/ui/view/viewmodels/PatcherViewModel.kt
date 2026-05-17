@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import kotlin.coroutines.resume
-import kotlinx.coroutines.resumeWithException
 
 @HiltViewModel
 class PatcherViewModel @Inject constructor(
@@ -60,7 +59,7 @@ class PatcherViewModel @Inject constructor(
             throw IllegalStateException("Shizuku unavailable or permission not granted")
         suspendCancellableCoroutine<Unit> { cont ->
             ShizukuHelper.bind(context) { ok ->
-                if (ok) cont.resume(Unit) else cont.resumeWithException(Exception("Shizuku bind failed"))
+                if (ok) cont.resume(Unit) else cont.resumeWith(Result.failure(Exception("Shizuku bind failed")))
             }
         }
     }
