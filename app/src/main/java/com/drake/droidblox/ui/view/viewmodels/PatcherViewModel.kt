@@ -38,29 +38,29 @@ class PatcherViewModel @Inject constructor(
 
         _state.value = PatcherState(PatchStep.IDLE, progress = 0f, message = "Connecting to Shizuku...")
         viewModelScope.launch {
-            val connected = ensureShizuku()
-            if (!connected) {
-                _state.value = PatcherState(error = "Failed to connect to Shizuku. Grant Shizuku permission in the Integrations screen first.")
-                return@launch
-            }
-
-            patcher.run(raw, execCommand = { ShizukuHelper.runCommand(it) }) { newState ->
+            patcher.run(raw, execCommand = { cmd ->
+                ensureConnected()
+                try {
+                    ShizukuHelper.runCommand(cmd)
+                } catch (e: Exception) {
+                    logger.e("Shizuku exec failed, retrying: ${e.message}")
+                    ensureConnected()
+                    ShizukuHelper.runCommand(cmd)
+                }
+            }) { newState ->
                 _state.value = newState
             }
         }
     }
 
-    private suspend fun ensureShizuku(): Boolean = suspendCancellableCoroutine { cont ->
-        if (ShizukuHelper.isBound) {
-            cont.resume(true)
-            return@suspendCancellableCoroutine
-        }
-        if (!ShizukuHelper.isAvailable() || !ShizukuHelper.hasPermission()) {
-            cont.resume(false)
-            return@suspendCancellableCoroutine
-        }
-        ShizukuHelper.bind(context) { ok ->
-            cont.resume(ok)
+    private suspend fun ensureConnected() {
+        if (ShizukuHelper.isBound) return
+        if (!ShizukuHelper.isAvailable() || !ShizukuHelper.hasPermission())
+            throw IllegalStateException("Shizuku unavailable or permission not granted")
+        suspendCancellableCoroutine<Unit> { cont ->
+            ShizukuHelper.bind(context) { ok ->
+                if (ok) cont.resume(Unit) else cont.resumeWith(Exception("Shizuku bind failed"))
+            }
         }
     }
 
