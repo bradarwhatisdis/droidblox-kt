@@ -1,6 +1,6 @@
 package com.drake.droidblox.shizuku
 
-import moe.shizuku.api.Shizuku
+import rikka.shizuku.Shizuku
 import java.io.OutputStream
 
 object ShizukuHelper {
