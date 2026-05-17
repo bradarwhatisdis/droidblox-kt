@@ -4,16 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.core.net.toUri
-import com.drake.droidblox.logger.AndroidLogger
 import com.drake.droidblox.logger.Logger
 import com.drake.droidblox.sharedprefs.FastFlagsManager
 import com.drake.droidblox.sharedprefs.SettingsManager
 import java.io.File
 
 private const val TAG = "DBLaunchRoblox"
-private const val ROBLOX_PACKAGE = "com.roblox.client"
-
-private val logger: Logger = AndroidLogger
+const val ROBLOX_PACKAGE = "com.roblox.client"
 
 fun isRobloxInstalled(context: Context): Boolean {
     return try {
@@ -33,42 +30,55 @@ fun getRobloxVersion(context: Context): String? {
     }
 }
 
+private fun resolveLaunchIntent(context: Context, deeplink: String): Intent? {
+    if (deeplink.isNotBlank()) {
+        val deepIntent = Intent(Intent.ACTION_VIEW, deeplink.toUri()).apply {
+            `package` = ROBLOX_PACKAGE
+        }
+        if (deepIntent.resolveActivity(context.packageManager) != null) return deepIntent
+    }
+
+    val launchIntent = context.packageManager.getLaunchIntentForPackage(ROBLOX_PACKAGE)
+    if (launchIntent != null) return launchIntent
+
+    return null
+}
+
 fun launchRoblox(
     context: Context,
     settingsManager: SettingsManager,
     fflagsManager: FastFlagsManager,
+    logger: Logger,
     deeplink: String = ""
 ) {
-    if (settingsManager.applyFFlags) {
-        logger.d(TAG, "Applying fast flags")
-        val currentFFlags = fflagsManager.rawFFlags
-        if (currentFFlags != null) {
-            val fflagDir = File(context.filesDir, "exe/ClientSettings")
-            val fflagFile = File(fflagDir, "ClientAppSettings.json")
-            if (!fflagDir.exists()) {
-                logger.d(TAG, "Creating ClientSettings directory")
-                if (fflagDir.mkdirs()) {
-                    logger.d(TAG, "Successfully created directory, writing fflags")
-                    fflagFile.writeText(currentFFlags)
-                } else {
-                    logger.e(TAG, "Couldn't create directory")
-                }
-            } else {
-                logger.d(TAG, "Directory exists, writing fflags")
-                fflagFile.writeText(currentFFlags)
-            }
-        }
-    }
     try {
-        val intent = if (deeplink.isNotBlank()) {
-            Intent(Intent.ACTION_VIEW, deeplink.toUri()).apply {
-                `package` = ROBLOX_PACKAGE
+        if (settingsManager.applyFFlags) {
+            logger.d(TAG, "Applying fast flags")
+            val currentFFlags = fflagsManager.rawFFlags
+            if (currentFFlags != null) {
+                val fflagDir = File(context.filesDir, "exe/ClientSettings")
+                val fflagFile = File(fflagDir, "ClientAppSettings.json")
+                if (!fflagDir.exists()) {
+                    logger.d(TAG, "Creating ClientSettings directory")
+                    if (fflagDir.mkdirs()) {
+                        logger.d(TAG, "Successfully created directory, writing fflags")
+                        fflagFile.writeText(currentFFlags)
+                    } else {
+                        logger.e(TAG, "Couldn't create directory")
+                    }
+                } else {
+                    logger.d(TAG, "Directory exists, writing fflags")
+                    fflagFile.writeText(currentFFlags)
+                }
             }
-        } else {
-            context.packageManager.getLaunchIntentForPackage(ROBLOX_PACKAGE)
-                ?: throw PackageManager.NameNotFoundException(ROBLOX_PACKAGE)
         }
-        logger.d(TAG, "Starting activity: ${intent.action} ${intent.data}")
+
+        val intent = resolveLaunchIntent(context, deeplink)
+        if (intent == null) {
+            logger.e(TAG, "No launch intent found — is Roblox really installed?")
+            return
+        }
+        logger.d(TAG, "Starting activity: action=${intent.action} data=${intent.data} flags=${intent.flags}")
         context.startActivity(intent)
     } catch (e: Exception) {
         logger.e(TAG, "Failed to launch Roblox: ${e.message}")

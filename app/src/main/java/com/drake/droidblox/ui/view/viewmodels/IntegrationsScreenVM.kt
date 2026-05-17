@@ -3,8 +3,10 @@ package com.drake.droidblox.ui.view.viewmodels
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.drake.droidblox.logger.Logger
 import com.drake.droidblox.roblox.getRobloxVersion
 import com.drake.droidblox.roblox.isRobloxInstalled
+import com.drake.droidblox.roblox.launchRoblox
 import com.drake.droidblox.sharedprefs.FastFlagsManager
 import com.drake.droidblox.sharedprefs.SettingsManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +22,8 @@ data class RobloxStatus(
 class IntegrationsScreenVM @Inject constructor(
     @ApplicationContext private val context: Context?,
     val settingsManager: SettingsManager,
-    val fflagsManager: FastFlagsManager
+    val fflagsManager: FastFlagsManager,
+    private val logger: Logger
 ) : ViewModel() {
     var robloxStatus = mutableStateOf(context?.let { RobloxStatus(isRobloxInstalled(it), getRobloxVersion(it)) })
 
@@ -29,10 +32,11 @@ class IntegrationsScreenVM @Inject constructor(
     }
 
     fun launchRoblox() = context?.let {
-        com.drake.droidblox.roblox.launchRoblox(
+        launchRoblox(
             context = it,
             settingsManager = settingsManager,
-            fflagsManager = fflagsManager
+            fflagsManager = fflagsManager,
+            logger = logger
         )
     }
 }

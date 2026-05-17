@@ -85,16 +85,18 @@ internal fun PreviewIntegrationsScreen() {
         LocalContext provides LocalContext.current
     ) {
         val logger = TestLogger
+        val settingsManager = SettingsManager(
+            logger = logger,
+            context = LocalContext.current
+        )
         IntegrationsScreen(IntegrationsScreenVM(
             context = null,
-            settingsManager = SettingsManager(
-                logger = logger,
-                context = LocalContext.current
-            ),
+            settingsManager = settingsManager,
             fflagsManager = FastFlagsManager(
                 logger = logger,
                 context = LocalContext.current
-            )
+            ),
+            logger = logger
         ))
     }
 }
