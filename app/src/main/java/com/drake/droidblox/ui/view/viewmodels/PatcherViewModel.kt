@@ -43,7 +43,7 @@ class PatcherViewModel @Inject constructor(
                 try {
                     ShizukuHelper.runCommand(cmd)
                 } catch (e: Exception) {
-                    logger.e("Shizuku exec failed, retrying: ${e.message}")
+                    // retrying below
                     ensureConnected()
                     ShizukuHelper.runCommand(cmd)
                 }
@@ -59,7 +59,7 @@ class PatcherViewModel @Inject constructor(
             throw IllegalStateException("Shizuku unavailable or permission not granted")
         suspendCancellableCoroutine<Unit> { cont ->
             ShizukuHelper.bind(context) { ok ->
-                if (ok) cont.resume(Unit) else cont.resumeWith(Exception("Shizuku bind failed"))
+                if (ok) cont.resume(Unit) else cont.resumeWithException(Exception("Shizuku bind failed"))
             }
         }
     }
