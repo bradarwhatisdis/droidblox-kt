@@ -10,10 +10,11 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SectionText(
-    text: String
+    text: String,
+    icon: String = ""
 ) {
     Text(
-        text = text,
+        text = if (icon.isNotEmpty()) "$icon  $text" else text,
         modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.primary,

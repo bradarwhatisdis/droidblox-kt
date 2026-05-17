@@ -43,12 +43,12 @@ fun IntegrationsScreen(
         if (status != null) {
             if (status.installed) {
                 TitleWithSubtitle(
-                    "Roblox (v${status.version ?: "?"})",
+                    "🎮  Roblox (v${status.version ?: "?"})",
                     "Installed"
                 )
             } else {
                 TitleWithSubtitle(
-                    "Roblox",
+                    "🎮  Roblox",
                     "Not installed — install Roblox from the Play Store first"
                 )
             }
@@ -60,30 +60,30 @@ fun IntegrationsScreen(
         ) {
             viewModel.launchRoblox()
         }
-        SectionText("System")
+        SectionText("System", "⚙️")
         val shizuku = viewModel.shizukuState.value
         val connState = viewModel.shizukuConnectionState.value
         if (!shizuku.available) {
-            TitleWithSubtitle("Shizuku", "Not detected — install Shizuku from GitHub")
+            TitleWithSubtitle("🛡️  Shizuku", "Not detected — install Shizuku from GitHub")
         } else if (connState == ShizukuConnectionState.Requesting || connState == ShizukuConnectionState.Connecting) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                TitleWithSubtitle("Shizuku", "Connecting\u2026")
+                TitleWithSubtitle("🛡️  Shizuku", "Connecting\u2026")
             }
         } else if (connState == ShizukuConnectionState.Failed) {
-            TitleWithSubtitle("Shizuku", "Connection failed — tap to retry")
+            TitleWithSubtitle("🛡️  Shizuku", "Connection failed — tap to retry")
             ExtendedButton("Retry Shizuku", "Try connecting again") {
                 viewModel.requestAndConnectShizuku()
             }
         } else if (!shizuku.hasPermission) {
-            TitleWithSubtitle("Shizuku", "Permission not granted")
+            TitleWithSubtitle("🛡️  Shizuku", "Permission not granted")
             ExtendedButton("Grant Shizuku permission", "Required for Shizuku integration") {
                 viewModel.requestAndConnectShizuku()
             }
         } else if (!shizuku.bound) {
-            TitleWithSubtitle("Shizuku", "Permission granted, tap to connect")
+            TitleWithSubtitle("🛡️  Shizuku", "Permission granted, tap to connect")
             ExtendedButton("Connect Shizuku service", "Bind to the remote file writer") {
                 viewModel.connectShizuku()
             }
@@ -96,7 +96,7 @@ fun IntegrationsScreen(
                 viewModel.settingsManager.useShizuku = enabled
             }
         }
-        SectionText("Activity tracking")
+        SectionText("Activity tracking", "📊")
         ExtendedSwitch(
             "Enable activity tracking",
             "Allow DroidBlox to detect what Roblox game you're playing.",
@@ -107,7 +107,7 @@ fun IntegrationsScreen(
             "When in game, you'll be able to see where your server is located",
             viewModel.settingsManager.showServerLocation
         ) { viewModel.settingsManager.showServerLocation = it }
-        SectionText("Discord Rich Presence")
+        SectionText("Discord Rich Presence", "💬")
         //LoginToDiscordButton(navController)
         ExtendedSwitch(
             "Show game activity",

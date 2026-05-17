@@ -68,7 +68,7 @@ fun FFlagsScreen(
             viewModel.settingsManager.applyFFlags
         ) { viewModel.settingsManager.applyFFlags = it } }
 
-        item { SectionText("Rendering") }
+        item { SectionText("Rendering", "🎨") }
 
         //TODO("Extended Dropdown Anti-aliasing quality (MSAA)")
         item { ExtendedDropdown(
@@ -198,7 +198,7 @@ fun FFlagsScreen(
             viewModel.fflagsManager.edit { set("FIntFRMMaxGrassDistance", it) }
         } }
 
-        item { SectionText("Geometry") }
+        item { SectionText("Geometry", "📐") }
 
         item { ExtendedTextField( // TODO: Improve title and subtitle
             "LOD for Polygons",
@@ -233,7 +233,7 @@ fun FFlagsScreen(
             viewModel.fflagsManager.edit { set("DFIntCSGLevelOfDetailSwitchingDistanceL34", it) }
         } }
 
-        item { SectionText("User Interface") }
+        item { SectionText("User Interface", "🖥️") }
 
         item { ExtendedTextField( // TODO: Improve title and subtitle
             "Grass movement reduced motion factor",
