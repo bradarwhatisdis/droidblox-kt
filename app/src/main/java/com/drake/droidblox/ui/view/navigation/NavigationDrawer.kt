@@ -1,5 +1,9 @@
 package com.drake.droidblox.ui.view.navigation
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
@@ -32,39 +36,46 @@ fun NavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                Text(
-                    "DroidBlox",
-                    style = MaterialTheme.typography.titleLarge,
+                Column(
                     modifier = Modifier
-                        .padding(16.dp)
-                )
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                ) {
+                    Text(
+                        "⚡ DroidBlox",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(Modifier.height(2.dp))
+                    Text(
+                        "Roblox bootstrapper",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 HorizontalDivider()
+                Spacer(Modifier.height(8.dp))
                 NavigationDrawerItem(
-                    label = { Text("Integrations") },
+                    label = { Text("🔗  Integrations") },
                     selected = screenName == Routes.INTEGRATIONS,
                     onClick = {
                         navController?.navigate(Routes.INTEGRATIONS)
+                        scope.launch { drawerState.close() }
                     }
                 )
                 NavigationDrawerItem(
-                    label = { Text("Fast Flags") },
+                    label = { Text("⚙️  Fast Flags") },
                     selected = screenName == Routes.FFLAGS,
                     onClick = {
                         navController?.navigate(Routes.FFLAGS)
+                        scope.launch { drawerState.close() }
                     }
                 )
-//                NavigationDrawerItem(
-//                    label = { Text("Play Logs") },
-//                    selected = screenName == Routes.PLAYLOGS,
-//                    onClick = {
-//                        navController?.navigate(Routes.PLAYLOGS)
-//                    }
-//                )
                 NavigationDrawerItem(
-                    label = { Text("About") },
+                    label = { Text("📄  About") },
                     selected = screenName == Routes.ABOUT,
                     onClick = {
                         navController?.navigate(Routes.ABOUT)
+                        scope.launch { drawerState.close() }
                     }
                 )
             }
