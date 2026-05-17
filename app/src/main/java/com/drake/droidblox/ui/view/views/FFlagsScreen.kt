@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -16,8 +15,8 @@ import com.drake.droidblox.sharedprefs.SettingsManager
 import com.drake.droidblox.ui.components.BasicScreen
 import com.drake.droidblox.ui.components.DropdownItem
 import com.drake.droidblox.ui.components.ExtendedDropdown
+import com.drake.droidblox.ui.components.ExtendedSlider
 import com.drake.droidblox.ui.components.ExtendedSwitch
-import com.drake.droidblox.ui.components.ExtendedTextField
 import com.drake.droidblox.ui.components.SectionText
 import com.drake.droidblox.ui.view.viewmodels.FFlagsScreenVM
 
@@ -173,73 +172,97 @@ fun FFlagsScreen(
         ) {
             viewModel.fflagsManager.edit { set("DFFlagDebugPauseVoxelizer", it.toString()) }
         } }
-        item { ExtendedTextField( // TODO: Improve title and subtitle
+        item { ExtendedSlider(
             "Override quality level",
             "Overrides the quality level",
-            KeyboardType.Number,
-            currentFFlags["DFIntDebugFRMQualityLevelOverride"]
+            currentFFlags["DFIntDebugFRMQualityLevelOverride"],
+            valueRange = 0f..10f,
+            steps = 10,
+            interactive = viewModel.settingsManager.applyFFlags,
+            valueLabel = { "Level ${it.toInt()}" }
         ) {
             viewModel.fflagsManager.edit { set("DFIntDebugFRMQualityLevelOverride", it) }
         } }
-        item { ExtendedTextField( // TODO: Improve title and subtitle
+        item { ExtendedSlider(
             "Minimum grass distance",
             "Set the minimum distance of rendering grass",
-            KeyboardType.Number,
-            currentFFlags["FIntFRMMinGrassDistance"]
+            currentFFlags["FIntFRMMinGrassDistance"],
+            valueRange = 0f..500f,
+            steps = 50,
+            interactive = viewModel.settingsManager.applyFFlags,
+            valueLabel = { "${it.toInt()} studs" }
         ) {
             viewModel.fflagsManager.edit { set("FIntFRMMinGrassDistance", it) }
         } }
-        item { ExtendedTextField( // TODO: Improve title and subtitle
+        item { ExtendedSlider(
             "Maximum grass distance",
             "Set the maximum distance of rendering grass",
-            KeyboardType.Number,
-            currentFFlags["FIntFRMMaxGrassDistance"]
+            currentFFlags["FIntFRMMaxGrassDistance"],
+            valueRange = 0f..1000f,
+            steps = 100,
+            interactive = viewModel.settingsManager.applyFFlags,
+            valueLabel = { "${it.toInt()} studs" }
         ) {
             viewModel.fflagsManager.edit { set("FIntFRMMaxGrassDistance", it) }
         } }
 
         item { SectionText("Geometry", "📐") }
 
-        item { ExtendedTextField( // TODO: Improve title and subtitle
+        item { ExtendedSlider(
             "LOD for Polygons",
             "Overrides the LOD (Level of Detail) per stud",
-            KeyboardType.Number,
-            currentFFlags["DFIntCSGLevelOfDetailSwitchingDistance"]
+            currentFFlags["DFIntCSGLevelOfDetailSwitchingDistance"],
+            valueRange = 0f..100f,
+            steps = 100,
+            interactive = viewModel.settingsManager.applyFFlags,
+            valueLabel = { "${it.toInt()}" }
         ) {
             viewModel.fflagsManager.edit { set("DFIntCSGLevelOfDetailSwitchingDistance", it) }
         } }
-        item { ExtendedTextField( // TODO: Improve title and subtitle
+        item { ExtendedSlider(
             "LOD for Polygons L12",
             "Overrides the LOD (Level of Detail) per stud",
-            KeyboardType.Number,
-            currentFFlags["DFIntCSGLevelOfDetailSwitchingDistanceL12"]
+            currentFFlags["DFIntCSGLevelOfDetailSwitchingDistanceL12"],
+            valueRange = 0f..100f,
+            steps = 100,
+            interactive = viewModel.settingsManager.applyFFlags,
+            valueLabel = { "${it.toInt()}" }
         ) {
             viewModel.fflagsManager.edit { set("DFIntCSGLevelOfDetailSwitchingDistanceL12", it) }
         } }
-        item { ExtendedTextField( // TODO: Improve title and subtitle
+        item { ExtendedSlider(
             "LOD for Polygons L23",
             "Overrides the LOD (Level of Detail) per stud",
-            KeyboardType.Number,
-            currentFFlags["DFIntCSGLevelOfDetailSwitchingDistanceL23"]
+            currentFFlags["DFIntCSGLevelOfDetailSwitchingDistanceL23"],
+            valueRange = 0f..100f,
+            steps = 100,
+            interactive = viewModel.settingsManager.applyFFlags,
+            valueLabel = { "${it.toInt()}" }
         ) {
             viewModel.fflagsManager.edit { set("DFIntCSGLevelOfDetailSwitchingDistanceL23", it) }
         } }
-        item { ExtendedTextField( // TODO: Improve title and subtitle
+        item { ExtendedSlider(
             "LOD for Polygons L34",
             "Overrides the LOD (Level of Detail) per stud",
-            KeyboardType.Number,
-            currentFFlags["DFIntCSGLevelOfDetailSwitchingDistanceL34"]
+            currentFFlags["DFIntCSGLevelOfDetailSwitchingDistanceL34"],
+            valueRange = 0f..100f,
+            steps = 100,
+            interactive = viewModel.settingsManager.applyFFlags,
+            valueLabel = { "${it.toInt()}" }
         ) {
             viewModel.fflagsManager.edit { set("DFIntCSGLevelOfDetailSwitchingDistanceL34", it) }
         } }
 
         item { SectionText("User Interface", "🖥️") }
 
-        item { ExtendedTextField( // TODO: Improve title and subtitle
+        item { ExtendedSlider(
             "Grass movement reduced motion factor",
-            "Overrides the Grass movement reduced motion factor", // what the FUCK should i type
-            KeyboardType.Number,
-            currentFFlags["FIntGrassMovementReducedMotionFactor"]
+            "Reduces grass movement animation by this percentage",
+            currentFFlags["FIntGrassMovementReducedMotionFactor"],
+            valueRange = 0f..100f,
+            steps = 100,
+            interactive = viewModel.settingsManager.applyFFlags,
+            valueLabel = { "${it.toInt()}%" }
         ) {
             viewModel.fflagsManager.edit { set("FIntGrassMovementReducedMotionFactor", it) }
         } }
