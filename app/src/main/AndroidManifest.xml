@@ -7,7 +7,6 @@
 
     <queries>
         <package android:name="com.roblox.client"/>
-        <package android:name="moe.shizuku.manager"/>
     </queries>
 
     <application

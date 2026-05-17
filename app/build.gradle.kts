@@ -106,8 +106,6 @@ dependencies {
     // Kizzy
     implementation(libs.kizzyRPC)
 
-    // Shizuku
-    implementation(libs.shizuku.api)
 
     // Ktor
     implementation(libs.kotlinx.serialization.json)

@@ -50,9 +50,6 @@ ktorClientLogging = "3.3.3"
 ktorClientWebsockets = "3.3.3"
 orgJetbrainsKotlinPluginSerializationGradlePlugin = "2.3.0"
 
-# Shizuku
-shizuku = "13.1.5"
-
 # Pine
 xposedPine = "0.2.0"
 
@@ -106,8 +103,6 @@ kizzyRPC = { group = "com.github.dead8309", name = "KizzyRPC", version.ref = "ki
 # Kotlin
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 
-# Shizuku
-shizuku-api = { group = "dev.rikka.shizuku", name = "api", version.ref = "shizuku" }
 
 # Ktor
 ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktorClientAndroid" }
