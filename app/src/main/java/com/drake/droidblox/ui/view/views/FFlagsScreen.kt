@@ -172,6 +172,14 @@ fun FFlagsScreen(
         ) {
             viewModel.fflagsManager.edit { set("DFFlagDebugPauseVoxelizer", it.toString()) }
         } }
+        item { ExtendedSwitch(
+            "Disable DPI scaling",
+            "Renders at native resolution for sharper visuals",
+            currentFFlags["DFFlagDisableDPIScale"].toBoolean(),
+            interactive = viewModel.settingsManager.applyFFlags
+        ) {
+            viewModel.fflagsManager.edit { set("DFFlagDisableDPIScale", it.toString()) }
+        } }
         item { ExtendedSlider(
             "Override quality level",
             "Overrides the quality level",
@@ -182,6 +190,17 @@ fun FFlagsScreen(
             valueLabel = { "Level ${it.toInt()}" }
         ) {
             viewModel.fflagsManager.edit { set("DFIntDebugFRMQualityLevelOverride", it) }
+        } }
+        item { ExtendedSlider(
+            "FPS unlock",
+            "Unlocks the frame rate cap (may not work on all devices)",
+            currentFFlags["DFIntFpsUnlock"],
+            valueRange = 30f..240f,
+            steps = 210,
+            interactive = viewModel.settingsManager.applyFFlags,
+            valueLabel = { "${it.toInt()} FPS" }
+        ) {
+            viewModel.fflagsManager.edit { set("DFIntFpsUnlock", it) }
         } }
         item { ExtendedSlider(
             "Minimum grass distance",
@@ -265,6 +284,25 @@ fun FFlagsScreen(
             valueLabel = { "${it.toInt()}%" }
         ) {
             viewModel.fflagsManager.edit { set("FIntGrassMovementReducedMotionFactor", it) }
+        } }
+        item { ExtendedSlider(
+            "Max notifications",
+            "Limits the number of notifications shown",
+            currentFFlags["DFIntMaxNotifications"],
+            valueRange = 0f..20f,
+            steps = 20,
+            interactive = viewModel.settingsManager.applyFFlags,
+            valueLabel = { "${it.toInt()}" }
+        ) {
+            viewModel.fflagsManager.edit { set("DFIntMaxNotifications", it) }
+        } }
+        item { ExtendedSwitch(
+            "Skip teleport app prompt",
+            "Skips the 'Open in App?' dialog when teleporting",
+            currentFFlags["FFlagDebugDisableTeleportAppPrompt"].toBoolean(),
+            interactive = viewModel.settingsManager.applyFFlags
+        ) {
+            viewModel.fflagsManager.edit { set("FFlagDebugDisableTeleportAppPrompt", it.toString()) }
         } }
     })
 }
