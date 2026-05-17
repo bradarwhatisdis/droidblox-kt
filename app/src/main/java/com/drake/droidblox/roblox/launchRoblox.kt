@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import com.drake.droidblox.logger.Logger
 import com.drake.droidblox.sharedprefs.FastFlagsManager
 import com.drake.droidblox.sharedprefs.SettingsManager
+import com.drake.droidblox.shizuku.ShizukuHelper
 import java.io.File
 
 private const val TAG = "DBLaunchRoblox"
@@ -56,19 +57,20 @@ fun launchRoblox(
             logger.d(TAG, "Applying fast flags")
             val currentFFlags = fflagsManager.rawFFlags
             if (currentFFlags != null) {
-                val fflagDir = File(context.filesDir, "exe/ClientSettings")
-                val fflagFile = File(fflagDir, "ClientAppSettings.json")
-                if (!fflagDir.exists()) {
-                    logger.d(TAG, "Creating ClientSettings directory")
-                    if (fflagDir.mkdirs()) {
-                        logger.d(TAG, "Successfully created directory, writing fflags")
-                        fflagFile.writeText(currentFFlags)
+                if (settingsManager.useShizuku && ShizukuHelper.isAvailable() && ShizukuHelper.hasPermission()) {
+                    logger.d(TAG, "Writing via Shizuku to /data/local/tmp/")
+                    val ok = ShizukuHelper.writeFile(
+                        "/data/local/tmp/ClientAppSettings.json",
+                        currentFFlags
+                    )
+                    if (ok) {
+                        logger.d(TAG, "Shizuku write succeeded")
                     } else {
-                        logger.e(TAG, "Couldn't create directory")
+                        logger.w(TAG, "Shizuku write failed, falling back to local")
+                        writeLocalFFlags(context, currentFFlags, logger)
                     }
                 } else {
-                    logger.d(TAG, "Directory exists, writing fflags")
-                    fflagFile.writeText(currentFFlags)
+                    writeLocalFFlags(context, currentFFlags, logger)
                 }
             }
         }
@@ -82,5 +84,23 @@ fun launchRoblox(
         context.startActivity(intent)
     } catch (e: Exception) {
         logger.e(TAG, "Failed to launch Roblox: ${e.message}")
+    }
+}
+
+private fun writeLocalFFlags(context: Context, fflags: String, logger: Logger) {
+    logger.d(TAG, "Writing fflags to app files dir")
+    val fflagDir = File(context.filesDir, "exe/ClientSettings")
+    val fflagFile = File(fflagDir, "ClientAppSettings.json")
+    if (!fflagDir.exists()) {
+        logger.d(TAG, "Creating ClientSettings directory")
+        if (fflagDir.mkdirs()) {
+            logger.d(TAG, "Successfully created directory, writing fflags")
+            fflagFile.writeText(fflags)
+        } else {
+            logger.e(TAG, "Couldn't create directory")
+        }
+    } else {
+        logger.d(TAG, "Directory exists, writing fflags")
+        fflagFile.writeText(fflags)
     }
 }

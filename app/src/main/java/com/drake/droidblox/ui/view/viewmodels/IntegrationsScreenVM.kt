@@ -9,6 +9,7 @@ import com.drake.droidblox.roblox.isRobloxInstalled
 import com.drake.droidblox.roblox.launchRoblox
 import com.drake.droidblox.sharedprefs.FastFlagsManager
 import com.drake.droidblox.sharedprefs.SettingsManager
+import com.drake.droidblox.shizuku.ShizukuHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -27,8 +28,20 @@ class IntegrationsScreenVM @Inject constructor(
 ) : ViewModel() {
     var robloxStatus = mutableStateOf(context?.let { RobloxStatus(isRobloxInstalled(it), getRobloxVersion(it)) })
 
+    var shizukuAvailable = mutableStateOf(ShizukuHelper.isAvailable())
+
+    fun refreshShizuku() {
+        shizukuAvailable.value = ShizukuHelper.isAvailable()
+    }
+
     fun refreshRobloxStatus() {
         robloxStatus.value = context?.let { RobloxStatus(isRobloxInstalled(it), getRobloxVersion(it)) }
+    }
+
+    fun openShizukuSettings() {
+        context?.startActivity(
+            context.packageManager.getLaunchIntentForPackage("moe.shizuku.manager")
+        )
     }
 
     fun launchRoblox() = context?.let {

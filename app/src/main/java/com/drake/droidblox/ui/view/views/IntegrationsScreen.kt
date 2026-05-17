@@ -46,6 +46,22 @@ fun IntegrationsScreen(
         ) {
             if (status?.installed == true) viewModel.launchRoblox()
         }
+        SectionText("Shizuku")
+        val shizukuAvailable = viewModel.shizukuAvailable.value
+        if (shizukuAvailable) {
+            TitleWithSubtitle("Shizuku running", "FastFlags can be written to /data/local/tmp/")
+            ExtendedSwitch(
+                "Use Shizuku for FastFlags",
+                "Write FastFlags to /data/local/tmp/ so Roblox reads them",
+                viewModel.settingsManager.useShizuku
+            ) { viewModel.settingsManager.useShizuku = it }
+            ExtendedButton(
+                "Open Shizuku (grant permission)",
+                "Authorize DroidBlox in Shizuku app if not already"
+            ) { viewModel.openShizukuSettings() }
+        } else {
+            TitleWithSubtitle("Shizuku not available", "Install Shizuku from Play Store and activate it via ADB")
+        }
         SectionText("Activity tracking")
         ExtendedSwitch(
             "Enable activity tracking",
