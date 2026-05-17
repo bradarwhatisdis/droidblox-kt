@@ -52,6 +52,13 @@ jobs:
           name: droidblox-debug
           path: app/build/outputs/apk/debug/*.apk
 
+      - name: Rename APK for Telegram
+        run: |
+          VERSION=1.0
+          SHORT_SHA=${GITHUB_SHA::7}
+          cp app/build/outputs/apk/debug/app-debug.apk \
+            "app/build/outputs/apk/debug/DroidBlox-v${VERSION}-${SHORT_SHA}.apk"
+
       - name: Upload to Telegram
         env:
           TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -61,7 +68,9 @@ jobs:
             echo "TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set — skipping upload"
             exit 0
           fi
-          curl -s -F "document=@app/build/outputs/apk/debug/app-debug.apk" \
+          SHORT_SHA=${GITHUB_SHA::7}
+          APK="app/build/outputs/apk/debug/DroidBlox-v1.0-${SHORT_SHA}.apk"
+          curl -s -F "document=@${APK};filename=$(basename ${APK})" \
             "https://api.telegram.org/bot${TOKEN}/sendDocument" \
             -F "chat_id=${CHAT_ID}" \
-            -F "caption=DroidBlox Debug Build | ${{ github.sha }}"
+            -F "caption=DroidBlox Debug Build | ${GITHUB_SHA::7}"
