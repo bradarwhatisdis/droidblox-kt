@@ -47,10 +47,11 @@ fun IntegrationsScreen(
             }
         }
         ExtendedButton(
-            if (status?.installed == true) "Launch Roblox" else "Roblox not installed",
-            "Start playing Roblox"
+            "Launch Roblox",
+            "Start playing Roblox",
+            enabled = status?.installed == true
         ) {
-            if (status?.installed == true) viewModel.launchRoblox()
+            viewModel.launchRoblox()
         }
         SectionText("System")
         val shizuku = viewModel.shizukuState.value

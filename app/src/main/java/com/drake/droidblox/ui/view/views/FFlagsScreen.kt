@@ -160,14 +160,16 @@ fun FFlagsScreen(
         item { ExtendedSwitch(
             "Override sky to solid gray",
             "Overrides the sky into a solid gray color",
-            currentFFlags["FFlagDebugSkyGray"].toBoolean()
+            currentFFlags["FFlagDebugSkyGray"].toBoolean(),
+            interactive = viewModel.settingsManager.applyFFlags
         ) {
             viewModel.fflagsManager.edit { set("FFlagDebugSkyGray", it.toString()) }
         } }
         item { ExtendedSwitch( // TODO: Improve title and subtitle
             "Pause voxelizer",
             "Pauses the voxelizer",
-            currentFFlags["DBFFlagDebugPauseVoxelizer"].toBoolean()
+            currentFFlags["DBFFlagDebugPauseVoxelizer"].toBoolean(),
+            interactive = viewModel.settingsManager.applyFFlags
         ) {
             viewModel.fflagsManager.edit { set("DFFlagDebugPauseVoxelizer", it.toString()) }
         } }
