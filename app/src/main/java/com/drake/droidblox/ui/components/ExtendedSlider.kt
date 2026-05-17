@@ -29,8 +29,8 @@ fun ExtendedSlider(
     valueRange: ClosedFloatingPointRange<Float>,
     steps: Int = 0,
     interactive: Boolean = true,
-    onValueChangeFinished: (String) -> Unit,
-    valueLabel: (Float) -> String = { it.toInt().toString() }
+    valueLabel: (Float) -> String = { it.toInt().toString() },
+    onValueChangeFinished: (String) -> Unit
 ) {
     val initial = value?.toFloatOrNull()?.coerceIn(valueRange) ?: valueRange.start
     var sliderValue by remember(value, valueRange) { mutableStateOf(initial) }
