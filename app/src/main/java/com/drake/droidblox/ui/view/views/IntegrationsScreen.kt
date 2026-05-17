@@ -13,6 +13,8 @@ import com.drake.droidblox.logger.TestLogger
 import com.drake.droidblox.sharedprefs.FastFlagsManager
 import com.drake.droidblox.sharedprefs.SettingsManager
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.drake.droidblox.ui.components.BasicScreen
 import com.drake.droidblox.ui.components.ExtendedButton
 import com.drake.droidblox.ui.components.ExtendedSwitch
