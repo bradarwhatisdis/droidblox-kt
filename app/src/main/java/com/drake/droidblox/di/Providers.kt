@@ -1,13 +1,12 @@
 package com.drake.droidblox.di
 
-import android.app.Application
 import android.content.Context
-import com.drake.droidblox.DBApplication
 import com.drake.droidblox.apiservice.DiscordApi
 import com.drake.droidblox.apiservice.IpLocationApi
 import com.drake.droidblox.apiservice.RobloxApi
 import com.drake.droidblox.apiservice.httpclient.customHttpClient
 import com.drake.droidblox.logger.AndroidLogger
+import com.drake.droidblox.logger.FileLogger
 import com.drake.droidblox.logger.Logger
 import com.drake.droidblox.sharedprefs.SettingsManager
 import com.drake.droidblox.sharedprefs.FastFlagsManager
@@ -30,8 +29,14 @@ object Providers {
 
     @Provides
     @Singleton
-    fun provideLogger(): Logger {
-        return AndroidLogger
+    fun provideLogger(@ApplicationContext context: Context): Logger {
+        val loggers = listOf(AndroidLogger, FileLogger(context))
+        return object : Logger {
+            override fun d(tag: String, message: String) = loggers.forEach { it.d(tag, message) }
+            override fun i(tag: String, message: String) = loggers.forEach { it.i(tag, message) }
+            override fun w(tag: String, message: String) = loggers.forEach { it.w(tag, message) }
+            override fun e(tag: String, message: String) = loggers.forEach { it.e(tag, message) }
+        }
     }
 
     @Provides
