@@ -115,38 +115,39 @@ fun PatcherScreen(
             }
         }
 
-        if (state.log.isNotBlank()) {
-            Spacer(Modifier.height(16.dp))
-            Text("Patch Log", style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.height(8.dp))
-            Card(
+        Spacer(Modifier.height(16.dp))
+        Text("Patch Log", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(8.dp))
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+        ) {
+            Text(
+                state.log.ifBlank { "— no output yet —" },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Text(
-                    state.log,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(12.dp)
-                        .verticalScroll(rememberScrollState()),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(Modifier.height(8.dp))
-            OutlinedButton(onClick = {
+                    .fillMaxSize()
+                    .padding(12.dp)
+                    .verticalScroll(rememberScrollState()),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(Modifier.height(8.dp))
+        OutlinedButton(
+            onClick = {
                 val share = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
                     putExtra(Intent.EXTRA_TEXT, state.log)
                 }
                 context.startActivity(Intent.createChooser(share, "Export Patch Log"))
-            }) {
-                Text("📤  Export Log")
-            }
+            },
+            enabled = state.log.isNotBlank()
+        ) {
+            Text("📤  Export Log")
         }
     }
 }

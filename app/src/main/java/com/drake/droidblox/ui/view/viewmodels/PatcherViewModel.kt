@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import kotlin.coroutines.resume
+import kotlinx.coroutines.resumeWithException
 
 @HiltViewModel
 class PatcherViewModel @Inject constructor(
